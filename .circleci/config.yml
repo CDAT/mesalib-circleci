@@ -31,7 +31,7 @@ aliases:
   - &conda_rerender
     name: conda_rerender
     command: |
-       echo "xxx conda_rerender xxx"
+       echo "xxxxx conda_rerender xxx"
        git clone https://github.com/CDAT/conda-recipes.git $WORKDIR/conda-recipes 
        source $WORKDIR/miniconda/etc/profile.d/conda.sh
        conda activate base
@@ -44,6 +44,7 @@ aliases:
   - &conda_build
      name: conda_build
      command: |
+        echo "xxx conda_build xxx"
         source $WORKDIR/miniconda/etc/profile.d/conda.sh
         conda activate base
         conda config --add channels conda-forge --force
@@ -160,4 +161,9 @@ workflows:
          - linux_build:
               requires:
                  - linux_setup
+         - upload:
+              requires:
+                 - macos_setup
+                 - linux_setup
+
 
