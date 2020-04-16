@@ -31,7 +31,7 @@ aliases:
   - &conda_rerender
     name: conda_rerender
     command: |
-       echo "xxxxx conda_rerender xxx"
+       echo "xxx conda_rerender xxx"
        git clone https://github.com/CDAT/conda-recipes.git $WORKDIR/conda-recipes 
        source $WORKDIR/miniconda/etc/profile.d/conda.sh
        conda activate base
