@@ -49,8 +49,8 @@ aliases:
         conda config --add channels conda-forge --force
         conda config --add channels cdat/label/nightly --force
         conda config --set channel_priority strict
-        cd $WORKDIR/vtk-feedstock
-        conda build -m .ci_support/${VARIANT}.____cpython.yaml recipe/
+        cd $WORKDIR/mesalib-feedstock
+        conda build -m .ci_support/${VARIANT}.yaml recipe/
 
   - &conda_upload
     name: conda_upload
@@ -96,10 +96,68 @@ jobs:
               root: /home/circleci/project
               paths:
                  - linux_build
-    
+
+   osx_build:
+      macos:
+         xcode: "11.4.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         VARIANT: "osx_"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - macos_build/miniconda/conda-bld/osx-64/mesalib-*tar.bz2
+
+   linux_build:
+      docker:
+         - image: condaforge/linux-anvil-comp7
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         VARIANT: "linux_"
+      steps:
+         - checkout
+         - run: mkdir -p /home/circleci/project
+         - attach_workspace:
+              at: /home/circleci/project
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - linux_build/miniconda/conda-bld/linux-64/mesalib-*tar.bz2
+
+   upload:
+      macos:
+         xcode: "11.4.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "mesalib"
+         VERSION: "18.0.0"
+         USER: "cdat"
+         LABEL: "linabuild"
+      steps:
+         - attach_workspace:
+              at: .
+         - run: pwd
+         - run: ls -l
+         - run: ls -l macos_build/miniconda/conda-bld/osx-64
+         #- run: ls -l linux_build/miniconda/conda-bld/linux-64
+         - run: *conda_upload
+
 workflows:
    version: 2
-   vtk:
+   mesalib:
       jobs:
          - macos_setup
          - linux_setup
+         - osx_build:
+              requires:
+                 - macos_setup
+         - linux_build:
+              requires:
+                 - linux_setup
+
